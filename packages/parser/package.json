@@ -1,0 +1,25 @@
+{
+  "name": "@codemap/parser",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "web-tree-sitter": "^0.27.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tree-sitter-cli": "^0.27.1",
+    "tree-sitter-javascript": "^0.25.0",
+    "tree-sitter-typescript": "^0.23.2"
+  }
+}

@@ -1,0 +1,209 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AnalysisStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum NodeType {
+  FILE
+  DIRECTORY
+}
+
+enum ResolutionStatus {
+  RESOLVED
+  EXTERNAL
+  UNRESOLVED
+}
+
+enum ImportKind {
+  IMPORT
+  RE_EXPORT
+  DYNAMIC_IMPORT
+  REQUIRE
+}
+
+enum SharePermission {
+  VIEW
+  EDIT
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  repositories Repository[]
+  shares       Share[]
+}
+
+model Repository {
+  id              String  @id @default(cuid())
+  githubId        BigInt  @unique
+  owner           String
+  name            String
+  fullName        String  @unique
+  url             String
+  description     String?
+  defaultBranch   String?
+  primaryLanguage String?
+  stars           Int     @default(0)
+  forks           Int     @default(0)
+  sizeKb          Int     @default(0)
+
+  ownerId String?
+  user    User?   @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  analyses Analysis[]
+
+  @@index([ownerId])
+  @@index([owner, name])
+}
+
+model Analysis {
+  id            String         @id @default(cuid())
+  repositoryId  String
+  commitSha     String
+  branch        String?
+  commitMessage String?
+  commitAuthor  String?
+  commitDate    DateTime?
+  status        AnalysisStatus @default(QUEUED)
+  startedAt     DateTime?
+  completedAt   DateTime?
+  errorMessage  String?
+
+  parserVersion   String?
+  analyzerVersion String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  nodes   FileNode[]
+  edges   DependencyEdge[]
+  metrics AnalysisMetric?
+  shares  Share[]
+
+  @@unique([repositoryId, commitSha])
+  @@index([repositoryId, createdAt])
+  @@index([status, createdAt])
+}
+
+model FileNode {
+  id         String  @id @default(cuid())
+  analysisId String
+  parentId   String?
+
+  path      String
+  name      String
+  extension String?
+  language  String?
+  purpose   String?
+
+  type      NodeType
+  sizeBytes BigInt   @default(0)
+  lineCount Int?
+
+  fanIn  Int @default(0)
+  fanOut Int @default(0)
+
+  createdAt DateTime @default(now())
+
+  analysis Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
+  parent   FileNode?  @relation("FileNodeHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children FileNode[] @relation("FileNodeHierarchy")
+
+  outgoingEdges DependencyEdge[] @relation("DependencySource")
+  incomingEdges DependencyEdge[] @relation("DependencyTarget")
+
+  @@unique([analysisId, path])
+  @@index([analysisId, type])
+  @@index([analysisId, language])
+  @@index([parentId])
+}
+
+model DependencyEdge {
+  id           String  @id @default(cuid())
+  analysisId   String
+  sourceNodeId String
+  targetNodeId String?
+
+  importSource String
+  importKind   ImportKind
+  resolution   ResolutionStatus
+
+  line      Int?
+  createdAt DateTime @default(now())
+
+  analysis Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
+  source FileNode  @relation("DependencySource", fields: [sourceNodeId], references: [id], onDelete: Cascade)
+  target FileNode? @relation("DependencyTarget", fields: [targetNodeId], references: [id], onDelete: SetNull)
+
+  @@unique([analysisId, sourceNodeId, importSource, line, importKind])
+  @@index([analysisId, sourceNodeId])
+  @@index([analysisId, targetNodeId])
+  @@index([analysisId, resolution])
+}
+
+model AnalysisMetric {
+  id         String @id @default(cuid())
+  analysisId String @unique
+
+  totalFiles       Int @default(0)
+  totalFolders     Int @default(0)
+  parsedFiles      Int @default(0)
+  skippedFiles     Int @default(0)
+  syntaxErrorFiles Int @default(0)
+  failedFiles      Int @default(0)
+
+  totalNodes      Int @default(0)
+  totalEdges      Int @default(0)
+  resolvedEdges   Int @default(0)
+  externalEdges   Int @default(0)
+  unresolvedEdges Int @default(0)
+
+  circularDependencies Int    @default(0)
+  totalSizeBytes       BigInt @default(0)
+
+  languageCounts     Json?
+  analysisDurationMs Int?
+
+  createdAt DateTime @default(now())
+
+  analysis Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+}
+
+model Share {
+  id         String          @id @default(cuid())
+  analysisId String
+  userId     String?
+  token      String          @unique
+  permission SharePermission @default(VIEW)
+  expiresAt  DateTime?
+  createdAt  DateTime        @default(now())
+
+  analysis Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([analysisId])
+  @@index([userId])
+}

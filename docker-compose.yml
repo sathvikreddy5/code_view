@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: codemap-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: codemap
+      POSTGRES_PASSWORD: codemap_dev_password
+      POSTGRES_DB: codemap
+    ports:
+      - "5433:5432"
+    volumes:
+      - codemap_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U codemap -d codemap"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: codemap-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - codemap_redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  codemap_postgres_data:
+  codemap_redis_data:

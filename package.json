@@ -1,0 +1,24 @@
+{
+  "name": "codemap",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interactive codebase visualization and dependency mapping platform",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@codemap/web",
+    "dev:web": "npm run dev --workspace=@codemap/web",
+    "dev:api": "npm run dev --workspace=@codemap/api",
+    "dev:worker": "npm run dev --workspace=@codemap/worker",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20.20.0",
+    "npm": ">=10.0.0"
+  }
+}
