@@ -183,16 +183,6 @@ function filterTree(
   }, []);
 }
 
-function collectFiles(nodes: RepositoryTreeNode[]): RepositoryTreeNode[] {
-  return nodes.flatMap((node) => {
-    if (node.type === "file") {
-      return [node];
-    }
-
-    return collectFiles(node.children ?? []);
-  });
-}
-
 function findFirstFile(node: RepositoryTreeNode): RepositoryTreeNode | null {
   if (node.type === "file") return node;
 
@@ -371,8 +361,6 @@ export default function RepositoryExplorer({
   );
 
   const [search, setSearch] = useState("");
-  const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
-  const [globalSearchQuery, setGlobalSearchQuery] = useState("");
   const [flowNodes, setFlowNodes, onNodesChange] = useNodesState<
     Node<ExplorerNodeData>
   >([]);
