@@ -90,8 +90,10 @@ function App() {
   return (
     <div className="app-shell">
       <div className="main-content">
-        <Topbar onNewAnalysis={handleNewAnalysis} />
-
+        <Topbar
+          onNewAnalysis={handleNewAnalysis}
+          onLogoClick={() => setHasEntered(false)}
+        />
         <main className="dashboard-content">
           {/* HERO */}
 

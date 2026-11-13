@@ -19,7 +19,7 @@ export default function WelcomePage({ onEnter }: WelcomePageProps) {
             <Network size={23} />
           </div>
           <span>
-            Atlas <span>Flow</span>
+            Atlas<span>Flow</span>
           </span>
         </div>
 

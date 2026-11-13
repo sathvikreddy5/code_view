@@ -782,15 +782,6 @@ export default function RepositoryExplorer({
         </div>
 
         <div className="explorer-header-right">
-          <button
-            type="button"
-            className="explorer-header-button"
-            onClick={() => setIsGlobalSearchOpen(true)}
-          >
-            <Search size={15} />
-            Search files
-          </button>
-
           <div className="branch-chip">
             <GitBranch size={14} />
 

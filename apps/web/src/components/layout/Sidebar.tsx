@@ -26,7 +26,7 @@ export default function Sidebar() {
 
         <div>
           <h1>
-            Code<span>Map</span>
+            Atlas<span>Flow</span>
           </h1>
           <p>CODE INTELLIGENCE</p>
         </div>
