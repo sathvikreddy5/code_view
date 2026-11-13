@@ -8,9 +8,19 @@ const app = express();
 
 app.use(helmet());
 
+const allowedOrigins = env.CORS_ORIGIN.split(",").map((origin) =>
+  origin.trim(),
+);
+
 app.use(
   cors({
-    origin: env.CORS_ORIGIN,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
   }),
 );
 

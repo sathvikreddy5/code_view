@@ -417,7 +417,9 @@ export default function RepositoryExplorer({
       setExpandedPaths(new Set());
 
       try {
-        const response = await fetch("http://localhost:4000/api/repos", {
+        const apiUrl = import.meta.env.VITE_API_URL;
+
+        const response = await fetch(`${apiUrl}/api/repos`, {
           method: "POST",
 
           headers: { "Content-Type": "application/json" },
