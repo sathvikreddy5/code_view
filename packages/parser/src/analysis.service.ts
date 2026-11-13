@@ -1,12 +1,8 @@
 import path from "node:path";
 import { readFile } from "node:fs/promises";
-
 import { detectSourceLanguage, parseSource } from "./parser.js";
-
 import { extractImports } from "./js-import-extractor.js";
-
 import { resolveDependency } from "./dependency-resolver.js";
-
 import {
   buildDependencyGraph,
   type FileDependencyInput,
