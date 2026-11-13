@@ -1035,29 +1035,36 @@
 
 /* Movable and resizable repository minimap */
 .codemap-minimap-panel {
-  width: 210px;
-  height: 155px;
-  min-width: 150px;
-  min-height: 110px;
+  width: 240px !important;
+  height: 175px !important;
+  min-width: 160px;
+  min-height: 120px;
+  max-width: 55vw;
+  max-height: 55vh;
+  display: flex;
+  flex-direction: column;
   resize: both;
-  overflow: hidden;
+  overflow: auto;
   box-sizing: border-box;
-  border: 1px solid rgba(45, 212, 191, 0.35);
-  border-radius: 10px;
+  padding: 0 !important;
+  border: 1px solid rgba(45, 212, 191, 0.45);
+  border-radius: 11px;
   background: #11121c;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
-  z-index: 20;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  pointer-events: auto;
 }
 
 .codemap-minimap-header {
-  height: 27px;
+  height: 30px;
+  min-height: 30px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 9px;
+  padding: 0 11px;
   background: #202332;
   color: #dbeafe;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   cursor: grab;
   user-select: none;
@@ -1069,14 +1076,17 @@
 }
 
 .minimap-drag-icon {
-  color: #14b8a6;
-  font-size: 16px;
+  color: #2dd4bf;
+  font-size: 17px;
 }
 
 .codemap-minimap-panel .react-flow__minimap {
-  position: relative;
+  position: relative !important;
+  flex: 1;
   width: 100%;
-  height: calc(100% - 27px);
+  height: auto !important;
+  min-height: 0;
   border: 0;
   border-radius: 0;
+  background: #171827;
 }

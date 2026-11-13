@@ -1,11 +1,7 @@
 import "@xyflow/react/dist/style.css";
-
 import "./RepositoryExplorer.css";
-
 import { useCallback, useEffect, useMemo, useState } from "react";
-
 import type { MouseEvent } from "react";
-
 import {
   Background,
   Controls,
@@ -16,9 +12,7 @@ import {
   ReactFlow,
   useNodesState,
 } from "@xyflow/react";
-
 import type { Edge, Node, NodeProps } from "@xyflow/react";
-
 import {
   ArrowLeft,
   ChevronDown,
@@ -40,117 +34,78 @@ import {
 
 type RepositoryTreeNode = {
   name: string;
-
   path: string;
-
   type: "file" | "folder";
-
   children?: RepositoryTreeNode[];
-
   language?: string | null;
-
   sizeBytes?: number;
 };
 
 type ExplorerNodeData = {
   kind: "folder" | "file";
-
   label: string;
-
   path: string;
-
   language?: string;
-
   fanIn?: number;
-
   fanOut?: number;
-
   expanded?: boolean;
-
   childCount?: number;
-
   onToggle?: (path: string) => void;
 };
 
 type RepositoryGraphNode = {
   id: string;
-
   type: string;
-
   fanIn: number;
-
   fanOut: number;
 };
 
 type RepositoryGraphEdge = {
   id: string;
-
   source: string;
-
   target: string | null;
-
   importSource: string;
-
   importKind: string;
-
   resolution: "resolved" | "external" | "unresolved";
-
   line: number;
 };
 
 type RepositoryAnalysisResponse = {
   success: boolean;
-
   message: string;
-
   error?: string;
 
   repository: {
     fullName: string;
-
     defaultBranch: string;
-
     primaryLanguage: string | null;
-
     stars: number;
-
     forks: number;
   };
 
   commit: {
     sha: string;
-
     message: string;
-
     author: string | null;
-
     date: string | null;
   };
 
   analysis: {
     status: string;
-
     totalFiles: number;
-
     totalFolders: number;
-
     languages: Record<string, number>;
 
     parser: {
       parsedFiles: number;
-
       skippedFiles: number;
     };
 
     graph: {
       totalNodes: number;
-
       totalEdges: number;
-
       resolvedEdges: number;
-
       unresolvedImports: number;
-
       externalImports: number;
     };
   };
@@ -159,20 +114,15 @@ type RepositoryAnalysisResponse = {
 
   graph: {
     nodes: RepositoryGraphNode[];
-
     edges: RepositoryGraphEdge[];
   };
 };
 
 type TreeEntryProps = {
   item: RepositoryTreeNode;
-
   depth: number;
-
   selectedPath: string;
-
   search: string;
-
   onSelect: (file: RepositoryTreeNode) => void;
 };
 
@@ -186,19 +136,12 @@ function getLanguage(fileName: string): string {
     return "JavaScript";
 
   if (extension === "py") return "Python";
-
   if (extension === "java") return "Java";
-
   if (extension === "go") return "Go";
-
   if (extension === "rs") return "Rust";
-
   if (extension === "css" || extension === "scss") return "CSS";
-
   if (extension === "html") return "HTML";
-
   if (extension === "json") return "JSON";
-
   if (extension === "md") return "Markdown";
 
   return "File";
@@ -238,6 +181,16 @@ function filterTree(
 
     return matches;
   }, []);
+}
+
+function collectFiles(nodes: RepositoryTreeNode[]): RepositoryTreeNode[] {
+  return nodes.flatMap((node) => {
+    if (node.type === "file") {
+      return [node];
+    }
+
+    return collectFiles(node.children ?? []);
+  });
 }
 
 function findFirstFile(node: RepositoryTreeNode): RepositoryTreeNode | null {
@@ -333,11 +286,8 @@ const nodeTypes = {
 
 function TreeEntry({
   item,
-
   depth,
-
   selectedPath,
-
   search,
 
   onSelect,
@@ -347,7 +297,6 @@ function TreeEntry({
   );
 
   const isFolder = item.type === "folder";
-
   const isSelected = selectedPath === item.path;
 
   const FileIcon = item.name.endsWith(".json")
@@ -422,7 +371,8 @@ export default function RepositoryExplorer({
   );
 
   const [search, setSearch] = useState("");
-
+  const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
+  const [globalSearchQuery, setGlobalSearchQuery] = useState("");
   const [flowNodes, setFlowNodes, onNodesChange] = useNodesState<
     Node<ExplorerNodeData>
   >([]);
@@ -832,6 +782,15 @@ export default function RepositoryExplorer({
         </div>
 
         <div className="explorer-header-right">
+          <button
+            type="button"
+            className="explorer-header-button"
+            onClick={() => setIsGlobalSearchOpen(true)}
+          >
+            <Search size={15} />
+            Search files
+          </button>
+
           <div className="branch-chip">
             <GitBranch size={14} />
 
@@ -1003,6 +962,7 @@ export default function RepositoryExplorer({
                       className="codemap-minimap-panel"
                       style={{
                         transform: `translate(${miniMapPosition.x}px, ${miniMapPosition.y}px)`,
+                        pointerEvents: "all",
                       }}
                     >
                       <div

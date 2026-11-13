@@ -3,7 +3,6 @@ import {
   ArrowRight,
   CheckCircle2,
   Code2,
-  ExternalLink,
   FolderGit2,
   GitBranch,
   Network,
@@ -11,68 +10,36 @@ import {
 
 import Topbar from "./components/layout/Topbar";
 import RepositoryExplorer from "./pages/RepositoryExplorer";
+import WelcomePage from "./pages/WelcomePage";
 
-const statistics = [
+const features = [
   {
-    label: "Repositories",
-    value: "03",
-    description: "Sample repositories",
+    label: "REPOSITORY STRUCTURE",
+    title: "Explore folders and files",
+    description: "Navigate repository hierarchies visually.",
     icon: FolderGit2,
     color: "cyan",
   },
   {
-    label: "Files analyzed",
-    value: "1,758",
-    description: "Across demo repositories",
+    label: "FILE ANALYSIS",
+    title: "Understand your code",
+    description: "Inspect files and their information.",
     icon: Code2,
     color: "violet",
   },
   {
-    label: "Dependencies",
-    value: "4,326",
-    description: "Sample dependency links",
+    label: "DEPENDENCY MAPPING",
+    title: "Discover connections",
+    description: "Visualize relationships between files.",
     icon: Network,
     color: "teal",
   },
   {
-    label: "Branches",
-    value: "08",
-    description: "Sample branch count",
+    label: "GIT EXPLORATION",
+    title: "Explore repository history",
+    description: "Build toward branch and commit-aware exploration.",
     icon: GitBranch,
     color: "blue",
-  },
-];
-
-const repositories = [
-  {
-    name: "react-dashboard",
-    description: "Modern React dashboard application",
-    language: "TypeScript",
-    languageColor: "#438eaa",
-    files: "428",
-    dependencies: "124",
-    updated: "2 hours ago",
-    owner: "demo",
-  },
-  {
-    name: "express-api",
-    description: "REST API and backend services",
-    language: "JavaScript",
-    languageColor: "#d5a6c9",
-    files: "315",
-    dependencies: "86",
-    updated: "Yesterday",
-    owner: "demo",
-  },
-  {
-    name: "career-platform",
-    description: "Full-stack recruitment platform",
-    language: "TypeScript",
-    languageColor: "#65d3d1",
-    files: "1,015",
-    dependencies: "215",
-    updated: "3 days ago",
-    owner: "demo",
   },
 ];
 
@@ -80,7 +47,9 @@ function App() {
   const [repositoryUrl, setRepositoryUrl] = useState("");
   const [message, setMessage] = useState("");
   const [isExplorerOpen, setIsExplorerOpen] = useState(false);
+  const [hasEntered, setHasEntered] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const heroTitleRef = useRef<HTMLDivElement>(null);
 
   function handleAnalyze(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -105,10 +74,8 @@ function App() {
     inputRef.current?.focus();
   }
 
-  function handleOpenRepository(url: string) {
-    setRepositoryUrl(url);
-    setMessage("");
-    setIsExplorerOpen(true);
+  if (!hasEntered) {
+    return <WelcomePage onEnter={() => setHasEntered(true)} />;
   }
 
   if (isExplorerOpen) {
@@ -128,22 +95,47 @@ function App() {
         <main className="dashboard-content">
           {/* HERO */}
 
-          <section className="welcome-section">
-            <div>
+          <section
+            className="welcome-section"
+            onPointerMove={(event) => {
+              const rect = event.currentTarget.getBoundingClientRect();
+
+              const x = (event.clientX - rect.left) / rect.width - 0.5;
+              const y = (event.clientY - rect.top) / rect.height - 0.5;
+
+              heroTitleRef.current?.style.setProperty(
+                "--pointer-x",
+                `${x * 8}px`,
+              );
+
+              heroTitleRef.current?.style.setProperty(
+                "--pointer-y",
+                `${y * 5}px`,
+              );
+            }}
+            onPointerLeave={() => {
+              heroTitleRef.current?.style.setProperty("--pointer-x", "0px");
+              heroTitleRef.current?.style.setProperty("--pointer-y", "0px");
+            }}
+          >
+            <div className="welcome-copy">
               <div className="welcome-eyebrow">
                 <span className="eyebrow-line" />
-                YOUR CODE INTELLIGENCE WORKSPACE
+                OPEN-SOURCE REPOSITORY EXPLORER
               </div>
 
-              <h1>
-                Understand your codebase.
-                <br />
-                <span>See the bigger picture.</span>
-              </h1>
+              <div className="hero-title-motion" ref={heroTitleRef}>
+                <h1 className="hero-title">
+                  Understand your codebase.
+                  <br />
+                  <span>See the bigger picture.</span>
+                </h1>
+              </div>
 
-              <p>
-                Explore repository structure, discover dependencies, and
-                understand how your code connects.
+              <p className="hero-description">
+                CodeMap transforms GitHub repositories into interactive visual
+                maps. Explore folders, understand file relationships, and
+                discover how your codebase connects.
               </p>
             </div>
 
@@ -228,38 +220,35 @@ function App() {
             </div>
           </section>
 
-          {/* STATISTICS */}
+          {/* CODEMAP FEATURES */}
 
           <section className="stats-section">
             <div className="section-heading">
               <div>
-                <h2>Workspace overview</h2>
-                <p>Your repository analysis at a glance</p>
+                <h2>Explore what CodeMap can do</h2>
+                <p>Tools to understand your codebase visually</p>
               </div>
-
-              <span className="demo-label">DEMO DATA</span>
             </div>
 
             <div className="stats-grid">
-              {statistics.map((stat) => {
-                const Icon = stat.icon;
+              {features.map((feature) => {
+                const Icon = feature.icon;
 
                 return (
-                  <article className="stat-card" key={stat.label}>
+                  <article className="stat-card" key={feature.label}>
                     <div className="stat-card-top">
-                      <span className="stat-title">{stat.label}</span>
+                      <span className="stat-title">{feature.label}</span>
 
-                      <div className={`stat-icon ${stat.color}`}>
+                      <div className={`stat-icon ${feature.color}`}>
                         <Icon size={21} />
                       </div>
                     </div>
 
-                    <div className="stat-value">{stat.value}</div>
+                    <div className="feature-card-title">{feature.title}</div>
 
                     <div className="stat-description">
                       <span className="stat-description-dot" />
-                      {stat.description}
-                      <ArrowRight className="stat-arrow" size={15} />
+                      {feature.description}
                     </div>
                   </article>
                 );
@@ -269,80 +258,57 @@ function App() {
 
           {/* RECENT REPOSITORIES */}
 
-          <section className="recent-section">
+          {/* HOW CODEMAP WORKS */}
+
+          <section className="recent-section how-it-works">
             <div className="section-heading">
               <div>
-                <h2>Recent repositories</h2>
-                <p>Explore your recently analyzed projects</p>
+                <h2>How CodeMap works</h2>
+                <p>
+                  From a GitHub URL to a visual understanding of your codebase
+                </p>
               </div>
-
-              <button
-                type="button"
-                className="text-button"
-                onClick={handleNewAnalysis}
-              >
-                New analysis
-                <ArrowRight size={15} />
-              </button>
             </div>
 
-            <div className="repositories-panel">
-              <div className="repository-table">
-                <div className="repository-table-header">
-                  <span>REPOSITORY</span>
-                  <span>LANGUAGE</span>
-                  <span>FILES</span>
-                  <span>DEPENDENCIES</span>
-                  <span>LAST UPDATED</span>
-                  <span />
+            <div className="how-it-works-grid">
+              <article className="how-card">
+                <div className="how-card-icon cyan">
+                  <FolderGit2 size={23} />
                 </div>
 
-                {repositories.map((repo, index) => (
-                  <div className="repository-row" key={repo.name}>
-                    <div className="repository-name">
-                      <div
-                        className={`repository-avatar ${
-                          index === 0 ? "cyan" : index === 1 ? "violet" : "teal"
-                        }`}
-                      >
-                        <FolderGit2 size={18} />
-                      </div>
+                <span className="how-step">STEP 01</span>
+                <h3>Connect a repository</h3>
+                <p>
+                  Paste a public GitHub repository URL and start exploring
+                  without installing anything.
+                </p>
+              </article>
 
-                      <div>
-                        <strong>{repo.name}</strong>
-                        <span>{repo.description}</span>
-                      </div>
-                    </div>
+              <article className="how-card">
+                <div className="how-card-icon violet">
+                  <Code2 size={23} />
+                </div>
 
-                    <div className="language-cell">
-                      <span
-                        className="language-dot"
-                        style={{ background: repo.languageColor }}
-                      />
-                      {repo.language}
-                    </div>
+                <span className="how-step">STEP 02</span>
+                <h3>Analyze the codebase</h3>
+                <p>
+                  CodeMap discovers repository files, folders and supported
+                  import relationships.
+                </p>
+              </article>
 
-                    <span className="table-number">{repo.files}</span>
+              <article className="how-card">
+                <div className="how-card-icon teal">
+                  <Network size={23} />
+                </div>
 
-                    <span className="table-number">{repo.dependencies}</span>
-
-                    <span className="updated-cell">{repo.updated}</span>
-
-                    <button
-                      type="button"
-                      className="row-menu"
-                      aria-label={`Explore ${repo.name}`}
-                      onClick={() =>
-                        handleOpenRepository(
-                          `https://github.com/${repo.owner}/${repo.name}`,
-                        )
-                      }
-                    >
-                      <ExternalLink size={16} />
-                    </button>
-                  </div>
-                ))}
-              </div>
+                <span className="how-step">STEP 03</span>
+                <h3>Explore the connections</h3>
+                <p>
+                  Navigate the repository structure and visualize how files
+                  connect through dependencies.
+                </p>
+              </article>
             </div>
           </section>
 

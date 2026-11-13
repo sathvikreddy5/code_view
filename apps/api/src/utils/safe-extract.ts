@@ -37,6 +37,7 @@ export async function extractRepositoryArchive(
 
     let entryCount = 0;
     let extractedBytes = 0;
+    let skippedLargeFiles = 0;
 
     await tar.x({
       file: archivePath,
@@ -87,14 +88,24 @@ export async function extractRepositoryArchive(
 
         if (entry.type === "File") {
           const fileSize = entry.size ?? 0;
+
+          // Skip oversized files instead of crashing extraction.
           if (fileSize > MAX_FILE_BYTES) {
-            throw new Error(
-              `Repository file exceeds the 25 MB limit: ${entryPath}`,
+            skippedLargeFiles++;
+
+            console.warn(
+              `[CodeMap] Skipping oversized file (${(
+                fileSize /
+                (1024 * 1024)
+              ).toFixed(2)} MB): ${entryPath}`,
             );
+
+            return false;
           }
 
           extractedBytes += fileSize;
 
+          // Retain the overall extracted-size protection.
           if (extractedBytes > MAX_EXTRACTED_BYTES) {
             throw new Error(
               "Repository exceeds the 200 MB extracted-size limit.",
@@ -105,6 +116,10 @@ export async function extractRepositoryArchive(
         return true;
       },
     });
+
+    console.log(
+      `[CodeMap] Repository extraction completed. Skipped ${skippedLargeFiles} oversized file(s).`,
+    );
 
     return {
       rootDir,
