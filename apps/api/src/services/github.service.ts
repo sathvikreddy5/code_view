@@ -35,6 +35,17 @@ export type RepositoryMetadata = {
 
 const MAX_ARCHIVE_BYTES = 100 * 1024 * 1024;
 
+function getGitHubHeaders(): HeadersInit {
+  const token = process.env.GITHUB_TOKEN;
+
+  return {
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+    "User-Agent": "Atlas-Flow",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
 function parseGitHubUrl(url: string) {
   const parsed = new URL(url);
 
@@ -78,11 +89,7 @@ function parseGitHubUrl(url: string) {
 
 async function githubGet<T>(endpoint: string): Promise<T> {
   const response = await fetch(`https://api.github.com${endpoint}`, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2022-11-28",
-      "User-Agent": "CodeMap",
-    },
+    headers: getGitHubHeaders(),
     signal: AbortSignal.timeout(20_000),
   });
 
@@ -157,10 +164,7 @@ export async function downloadRepositoryArchive(
     `${encodeURIComponent(repository)}/tarball/${encodeURIComponent(commitSha)}`;
 
   const response = await fetch(endpoint, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      "User-Agent": "CodeMap",
-    },
+    headers: getGitHubHeaders(),
     redirect: "follow",
     signal: AbortSignal.timeout(60_000),
   });
